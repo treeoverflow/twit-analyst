@@ -19,7 +19,7 @@ const getMentions = async (keyword) => {
     if (res.body) {
         return res.body;
     } else {
-        throw new Error('Unsuccesful request');
+        throw new Error('Unsuccessful request');
     }
 }
 
