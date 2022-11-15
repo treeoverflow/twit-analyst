@@ -5,11 +5,14 @@ const app = express();
 const port = 3000;
 
 app.get('/mentions', async (req, res) => {
-    const {filterBy, startTime, endTime} = req.query;
-    const nowMs = Date.now();
-    let startTimeISO, endTimeISO, startTimeMs, endTimeMs;
+    const {filterBy: keyword, startTime, endTime} = req.query;
+    const currentTimeMs = Date.now();
+    let startTimeISO;
+    let endTimeISO;
+    let startTimeMs;
+    let endTimeMs;
 
-    if (!validFilterBy(filterBy)) {
+    if (!isValidKeyword(keyword)) {
         res.send('filterBy should exist');
         return;
     }
@@ -21,12 +24,12 @@ app.get('/mentions', async (req, res) => {
             return;
         }
 
-        if (!DateUtil.isPastDate(nowMs, startTimeMs)) {
+        if (!DateUtil.isPastDate(currentTimeMs, startTimeMs)) {
             res.send('startTime should be past time');
             return
         }
 
-        if (DateUtil.isDateOlderThanSevenDays(nowMs, startTimeMs)) {
+        if (DateUtil.isDateOlderThanSevenDays(currentTimeMs, startTimeMs)) {
             res.send('startTime should be no more than 7 days ago');
             return;
         }
@@ -40,12 +43,12 @@ app.get('/mentions', async (req, res) => {
             return;
         }
 
-        if (DateUtil.isFutureDate(nowMs, endTimeMs)) {
+        if (DateUtil.isFutureDate(currentTimeMs, endTimeMs)) {
             res.send('endTime should be present or past time');
             return;
         }
 
-        if (DateUtil.isDateOlderThanSevenDays(nowMs, endTimeMs)) {
+        if (DateUtil.isDateOlderByDays(currentTimeMs, endTimeMs, 7)) {
             res.send('endTime should be no more than 7 days ago');
             return;
         }
@@ -56,14 +59,14 @@ app.get('/mentions', async (req, res) => {
         endTimeISO = new Date(endTime).toISOString();
     }
 
-    const data = await getMentions(filterBy, startTimeISO, endTimeISO);
-    res.send(data);
+    const mentionData = await getMentions(keyword, startTimeISO, endTimeISO);
+    res.send(mentionData);
 });
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
 
-function validFilterBy(filterBy) {
-    return filterBy ? /^[^\W_]{1,512}$/.test(filterBy) : false;
+function isValidKeyword(filterBy) {
+    return filterBy && (/^[^\W_]{1,512}$/.test(filterBy));
 }
