@@ -7,6 +7,7 @@ const port = 3000;
 app.get('/mentions', async (req, res) => {
     const {filterBy: keyword, startTime, endTime} = req.query;
     const currentTimeMs = Date.now();
+    const sevenDays = 7;
     let startTimeISO;
     let endTimeISO;
     let startTimeMs;
@@ -24,12 +25,12 @@ app.get('/mentions', async (req, res) => {
             return;
         }
 
-        if (!DateUtil.isPastDate(currentTimeMs, startTimeMs)) {
+        if (!DateUtil.isPastTime(currentTimeMs, startTimeMs)) {
             res.send('startTime should be past time');
             return
         }
 
-        if (DateUtil.isDateOlderThanSevenDays(currentTimeMs, startTimeMs)) {
+        if (DateUtil.isTimeOlderByDays(currentTimeMs, startTimeMs, sevenDays)) {
             res.send('startTime should be no more than 7 days ago');
             return;
         }
@@ -43,17 +44,17 @@ app.get('/mentions', async (req, res) => {
             return;
         }
 
-        if (DateUtil.isFutureDate(currentTimeMs, endTimeMs)) {
+        if (DateUtil.isFutureTime(currentTimeMs, endTimeMs)) {
             res.send('endTime should be present or past time');
             return;
         }
 
-        if (DateUtil.isDateOlderByDays(currentTimeMs, endTimeMs, 7)) {
+        if (DateUtil.isTimeOlderByDays(currentTimeMs, endTimeMs, sevenDays)) {
             res.send('endTime should be no more than 7 days ago');
             return;
         }
 
-        if (startTime && !DateUtil.isFutureDate(startTimeMs, endTimeMs)) {
+        if (startTime && !DateUtil.isFutureTime(startTimeMs, endTimeMs)) {
             res.send('endTime should be after startTime');
         }
         endTimeISO = new Date(endTime).toISOString();
