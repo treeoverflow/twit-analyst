@@ -6,7 +6,7 @@ const endpointURL = 'https://api.twitter.com/2/tweets/counts/recent';
 const getMentions = async (keyword, startTime, endTime) => {
     
     const params = {
-        'query': keyword
+        query: keyword
     }
     if (startTime) params.start_time = startTime;
     if (endTime) params.end_time = endTime;

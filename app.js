@@ -3,11 +3,12 @@ const {getMentions} = require('./src/api/analyst.js');
 const DateUtil = require("./src/util/date-util");
 const app = express();
 const port = 3000;
+const keywordRegexp = /^[^\W_]{1,512}$/;
 
 app.get('/mentions', async (req, res) => {
     const {filterBy: keyword, startTime, endTime} = req.query;
     const currentTimeMs = Date.now();
-    const sevenDays = 7;
+    const maxObservableDays = 7;
     let startTimeISO;
     let endTimeISO;
     let startTimeMs;
@@ -30,7 +31,7 @@ app.get('/mentions', async (req, res) => {
             return
         }
 
-        if (DateUtil.isTimeOlderByDays(currentTimeMs, startTimeMs, sevenDays)) {
+        if (DateUtil.isTimeOlderByDays(currentTimeMs, startTimeMs, maxObservableDays)) {
             res.send('startTime should be no more than 7 days ago');
             return;
         }
@@ -49,7 +50,7 @@ app.get('/mentions', async (req, res) => {
             return;
         }
 
-        if (DateUtil.isTimeOlderByDays(currentTimeMs, endTimeMs, sevenDays)) {
+        if (DateUtil.isTimeOlderByDays(currentTimeMs, endTimeMs, maxObservableDays)) {
             res.send('endTime should be no more than 7 days ago');
             return;
         }
@@ -68,6 +69,6 @@ app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
 
-function isValidKeyword(filterBy) {
-    return filterBy && (/^[^\W_]{1,512}$/.test(filterBy));
+function isValidKeyword(keyword) {
+    return keyword && keywordRegexp.test(keyword);
 }
