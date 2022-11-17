@@ -10,6 +10,7 @@
     "parserOptions": {
         "ecmaVersion": "latest"
     },
+    "ignorePatterns": ["node_modules/"],
     "rules": {
     }
 }
