@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint '**/*.js'",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC",
