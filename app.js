@@ -1,22 +1,20 @@
 const express = require('express');
-const { query, validationResult } = require('express-validator');
+const { check, validationResult } = require('express-validator');
 const { getMentions } = require('./src/api/analyst');
 const DateUtil = require('./src/util/date-util');
 
 const app = express();
 const port = 3000;
-const keywordRegexp = /^[^\W_]{1,512}$/;
+const keywordPattern = /^[^\W_]{1,512}$/;
 const maxObservableDays = 7;
 
-function isValidStartTime(timeISO) {
-  const currentTimeMs = Date.now();
+function isValidStartTime(currentTimeMs, timeISO) {
   const startTimeMs = Date.parse(timeISO);
   return DateUtil.isPastTime(currentTimeMs, startTimeMs)
     && !DateUtil.isTimeOlderByDays(currentTimeMs, startTimeMs, maxObservableDays);
 }
 
-function isValidEndTime(timeISO) {
-  const currentTimeMs = Date.now();
+function isValidEndTime(currentTimeMs, timeISO) {
   const endTimeMs = Date.parse(timeISO);
   return !DateUtil.isFutureTime(currentTimeMs, endTimeMs)
     && !DateUtil.isTimeOlderByDays(currentTimeMs, endTimeMs, maxObservableDays);
@@ -31,30 +29,41 @@ function isEndTimeComingAfterStartTime() {
 
 app.get(
   '/mentions',
-  query('filterBy')
-    .exists()
-    .withMessage('filterBy should exist')
-    .matches(keywordRegexp)
-    .withMessage('filterBy has invalid value'),
-
-  query('startTime')
-    .optional()
-    .isISO8601()
-    .withMessage('startTime should be ISO 8601 format')
-    .custom((startTime) => isValidStartTime(startTime))
-    .withMessage('startTime should be past time and be no more than 7 days ago'),
-
-  query('endTime')
-    .optional()
-    .isISO8601()
-    .withMessage('endTime should be ISO 8601 format')
-    .custom((endTime) => isValidEndTime(endTime))
-    .withMessage('endTime should be present or past time and be no more than 7 days ago')
-    .if(query('startTime').exists())
-    .custom(isEndTimeComingAfterStartTime())
-    .withMessage('endTime should be after startTime'),
 
   async (req, res) => {
+    let currentTimeMs;
+
+    await check('filterBy')
+      .exists()
+      .withMessage('filterBy should exist')
+      .bail()
+      .matches(keywordPattern)
+      .withMessage('filterBy has invalid value')
+      .run(req);
+
+    if (req.query.startTime || req.query.endTime) currentTimeMs = Date.now();
+
+    await check('startTime')
+      .optional()
+      .isISO8601()
+      .withMessage('startTime should be ISO 8601 format')
+      .bail()
+      .custom((startTime) => isValidStartTime(currentTimeMs, startTime))
+      .withMessage('startTime should be past time and be no more than 7 days ago')
+      .run(req);
+
+    await check('endTime')
+      .optional()
+      .isISO8601()
+      .withMessage('endTime should be ISO 8601 format')
+      .bail()
+      .custom((endTime) => isValidEndTime(currentTimeMs, endTime))
+      .withMessage('endTime should be present or past time and be no more than 7 days ago')
+      .if(check('startTime').exists())
+      .custom(isEndTimeComingAfterStartTime())
+      .withMessage('endTime should be after startTime')
+      .run(req);
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ errors: errors.array() });
