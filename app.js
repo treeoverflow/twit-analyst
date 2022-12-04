@@ -1,6 +1,6 @@
 const express = require('express');
 const { check, validationResult } = require('express-validator');
-const { getMentions } = require('./src/api/analyst');
+const { getTwitterMentionsCount } = require('./sm-tracking/twitter-mentions-count');
 const DateUtil = require('./src/util/date-util');
 
 const app = express();
@@ -77,7 +77,7 @@ app.get(
     if (startTime) startTimeISO = new Date(startTime).toISOString();
     if (endTime) endTimeISO = new Date(endTime).toISOString();
 
-    const mentionData = await getMentions(keyword, startTimeISO, endTimeISO);
+    const mentionData = await getTwitterMentionsCount(keyword, startTimeISO, endTimeISO);
     res.send(mentionData);
   },
 );
