@@ -1,6 +1,6 @@
 const express = require('express');
 const { check, validationResult } = require('express-validator');
-const { getTwitterMentionsCount } = require('./sm-tracking/twitter-mentions-count');
+const { getTwitterMentionsCount } = require('./src/sm-tracking/twitter-mentions-count');
 const DateUtil = require('./src/util/date-util');
 
 const app = express();
