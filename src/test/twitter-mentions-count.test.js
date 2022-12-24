@@ -860,6 +860,13 @@ const mockedMentionsByKeyword = {
 jest.mock('needle');
 
 describe('getTwitterMentionsCount', () => {
+  it('should throw error on failed request', () => {
+    needle.mockRejectedValue({});
+    const result = getTwitterMentionsCount('posi');
+
+    expect(result).rejects.toThrow('Unsuccessful request');
+  });
+
   describe('with parameters', () => {
     it('should call needle with keyword parameter', async () => {
       needle.mockResolvedValue({
@@ -932,34 +939,28 @@ describe('getTwitterMentionsCount', () => {
     });
   });
 
-  it('should return mentions by keyword for the recent 7 days', async () => {
-    needle.mockResolvedValue({
-      body: mockedMentionsByKeyword,
+  describe('data flow', () => {
+    it('should return mentions as it is (without any formatting)', async () => {
+      needle.mockResolvedValue({
+        body: mockedMentionsByKeyword,
+      });
+
+      const keyword = 'posi';
+      const result = await getTwitterMentionsCount(keyword);
+
+      const params = {
+        query: keyword,
+      };
+
+      const headers = {
+        headers: {
+          'User-Agent': 'v2TweetLookupJS',
+          authorization: `Bearer ${token}`,
+        },
+      };
+
+      expect(needle).toBeCalledWith('get', endpointURL, params, headers);
+      expect(result).toEqual(mockedMentionsByKeyword);
     });
-
-    const keyword = 'posi';
-    const result = await getTwitterMentionsCount(keyword);
-
-    const params = {
-      query: keyword,
-    };
-
-    const headers = {
-      headers: {
-        'User-Agent': 'v2TweetLookupJS',
-        authorization: `Bearer ${token}`,
-      },
-    };
-
-    expect(needle).toBeCalledWith('get', endpointURL, params, headers);
-    expect(result).toEqual(mockedMentionsByKeyword);
   });
 });
-
-/*
-test('', async () => {
-  expect(getTwitterMentionsCount(
-    'posi',
-    '2022-11-20T03:00:00+0300',
-    '2022-11-20T05:00:00%2B0300'))
-}) */

@@ -11,17 +11,18 @@ const getTwitterMentionsCount = async (keyword, startTime, endTime) => {
   if (startTime) params.start_time = startTime;
   if (endTime) params.end_time = endTime;
 
-  const res = await needle('get', endpointURL, params, {
-    headers: {
-      'User-Agent': 'v2TweetLookupJS',
-      authorization: `Bearer ${token}`,
-    },
-  });
+  try {
+    const res = await needle('get', endpointURL, params, {
+      headers: {
+        'User-Agent': 'v2TweetLookupJS',
+        authorization: `Bearer ${token}`,
+      },
+    });
 
-  if (res.body) {
     return res.body;
+  } catch (e) {
+    throw new Error('Unsuccessful request');
   }
-  throw new Error('Unsuccessful request');
 };
 
 module.exports = { getTwitterMentionsCount };
