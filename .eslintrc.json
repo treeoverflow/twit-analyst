@@ -8,8 +8,7 @@
     "overrides": [
         {
             "files": [
-                "**/*.test.js",
-                "**/*.test.jsx"
+                "**/*.test.js"
             ],
             "env": {
                 "jest": true
@@ -21,6 +20,13 @@
     },
     "ignorePatterns": ["node_modules/"],
     "rules": {
-        "max-len": ["error", { "code": 227}]
+        "max-len": ["error", { "code": 227}],
+        "comma-dangle": ["error", {
+            "arrays": "never",
+            "objects": "never",
+            "imports": "never",
+            "exports": "never",
+            "functions": "never"
+        }]
     }
 }
