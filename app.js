@@ -79,7 +79,7 @@ app.get(
 
     const mentionData = await getTwitterMentionsCount(keyword, startTimeISO, endTimeISO);
     res.send(mentionData);
-  },
+  }
 );
 
 app.listen(port);

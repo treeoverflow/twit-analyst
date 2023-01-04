@@ -6,11 +6,27 @@
     },
     "extends": "airbnb-base",
     "overrides": [
+        {
+            "files": [
+                "**/*.test.js"
+            ],
+            "env": {
+                "jest": true
+            }
+        }
     ],
     "parserOptions": {
         "ecmaVersion": "latest"
     },
     "ignorePatterns": ["node_modules/"],
     "rules": {
+        "max-len": ["error", { "code": 227}],
+        "comma-dangle": ["error", {
+            "arrays": "never",
+            "objects": "never",
+            "imports": "never",
+            "exports": "never",
+            "functions": "never"
+        }]
     }
 }
